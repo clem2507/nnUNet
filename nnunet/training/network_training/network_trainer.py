@@ -37,6 +37,7 @@ from abc import abstractmethod
 from datetime import datetime
 from tqdm import trange
 from nnunet.utilities.to_torch import maybe_to_torch, to_cuda
+import wandb
 
 
 class NetworkTrainer(object):
@@ -125,6 +126,8 @@ class NetworkTrainer(object):
         self.save_intermediate_checkpoints = True  # whether or not to save checkpoint_latest
         self.save_best_checkpoint = True  # whether or not to save the best checkpoint according to self.best_val_eval_criterion_MA
         self.save_final_checkpoint = True  # whether or not to save the final checkpoint
+
+        ################# Settings for wandb evaluation ###################################
         self.wandb_log = False
 
     @abstractmethod
@@ -413,6 +416,23 @@ class NetworkTrainer(object):
         pass
 
     def run_training(self):
+        
+        if self.wandb_log:
+            state_dic = {
+                "max_num_epochs": self.max_num_epochs,
+                "patience": self.patience,
+                "val_eval_criterion_alpha": self.val_eval_criterion_alpha,
+                "train_loss_MA_alpha": self.train_loss_MA_alpha,
+                "train_loss_MA_eps": self.train_loss_MA_eps,
+                "num_batches_per_epoch": self.num_batches_per_epoch,
+                "num_val_batches_per_epoch": self.num_val_batches_per_epoch,
+                "lr_threshold": self.lr_threshold,
+            }
+            wandb.init(
+                project="ift-6759-project",
+                config=state_dic
+            )
+
         if not torch.cuda.is_available():
             self.print_to_log_file("WARNING!!! You are attempting to run training on a CPU (torch.cuda.is_available() is False). This can be VERY slow!")
 
@@ -493,6 +513,8 @@ class NetworkTrainer(object):
             self.epoch += 1
             self.print_to_log_file("This epoch took %f s\n" % (epoch_end_time - epoch_start_time))
 
+            wandb.log({"train_loss": self.all_tr_losses[-1], "val_loss": self.all_val_losses[-1]})
+
         self.epoch -= 1  # if we don't do this we can get a problem with loading model_final_checkpoint.
 
         if self.save_final_checkpoint: self.save_checkpoint(join(self.output_folder, "model_final_checkpoint.model"))
@@ -501,6 +523,8 @@ class NetworkTrainer(object):
             os.remove(join(self.output_folder, "model_latest.model"))
         if isfile(join(self.output_folder, "model_latest.model.pkl")):
             os.remove(join(self.output_folder, "model_latest.model.pkl"))
+
+        wandb.finish()
 
     def maybe_update_lr(self):
         # maybe update learning rate

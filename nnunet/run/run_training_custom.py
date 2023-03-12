@@ -18,7 +18,7 @@ run_mixed_precision = not fp32
 val_folder = "validation_raw" # name of the validation folder, no need to use this for most people
 npz = False # makes the models save the softmax outputs during the final validation. It should only be used for trainings where you plan to run nnUNet_find_best_configuration afterwards (this is nnU-Nets automated selection of the best performing (ensemble of) configuration(s), see below). If you are developing new trainer classes you may not need the softmax predictions and should therefore omit the --npz flag.
 
-def load_model(network, network_trainer, task, fold, plans_identifier=default_plans_identifier):
+def load_model_trainer(network, network_trainer, task, fold, plans_identifier=default_plans_identifier):
     ''' Method to load the model according to the given parameters
 
     Args:
@@ -36,7 +36,7 @@ def load_model(network, network_trainer, task, fold, plans_identifier=default_pl
             Only change this if you created a custom experiment planner
 
     Returns:
-        trainer::nnUNetTrainer
+        trainer::NetworkTrainer
             Trainer module of the requested model
     '''
 
@@ -80,7 +80,7 @@ def train(trainer,
     ''' Method to train the model
 
     Args:
-        trainer::nnUNetTrainer
+        trainer::NetworkTrainer
             Trainer module of the model to be trained
         max_num_epochs::int
             Maximum number of epochs to train the model
@@ -108,8 +108,8 @@ def train(trainer,
     trainer.val_eval_criterion_alpha = val_eval_criterion_alpha
     trainer.wandb_log = wandb_log
 
+    trainer.initialize(True)
     trainer.run_training()
-
     trainer.network.eval()
 
     # predict validation
@@ -117,4 +117,3 @@ def train(trainer,
                      validation_folder_name=val_folder,
                      run_postprocessing_on_folds=False,
                      overwrite=False)
-    
