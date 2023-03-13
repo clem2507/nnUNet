@@ -631,7 +631,6 @@ class NetworkTrainer(object):
         return continue_training
 
     def on_epoch_end(self):
-        print("OK")
         self.dice_score = self.finish_online_evaluation()  # does not have to do anything, but can be used to update self.all_val_eval_
         # metrics
 
