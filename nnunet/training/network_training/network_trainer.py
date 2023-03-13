@@ -513,7 +513,8 @@ class NetworkTrainer(object):
             self.epoch += 1
             self.print_to_log_file("This epoch took %f s\n" % (epoch_end_time - epoch_start_time))
 
-            wandb.log({"train_loss": self.all_tr_losses[-1], "val_loss": self.all_val_losses[-1]})
+            if self.wandb_log:
+                wandb.log({"train_loss": self.all_tr_losses[-1], "val_loss": self.all_val_losses[-1]})
 
         self.epoch -= 1  # if we don't do this we can get a problem with loading model_final_checkpoint.
 
