@@ -723,6 +723,8 @@ class nnUNetTrainer(NetworkTrainer):
         self.online_eval_fp = []
         self.online_eval_fn = []
 
+        return [np.round(i, 4) for i in global_dc_per_class]
+
     def save_checkpoint(self, fname, save_optimizer=True):
         super(nnUNetTrainer, self).save_checkpoint(fname, save_optimizer)
         info = OrderedDict()

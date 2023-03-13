@@ -502,7 +502,7 @@ class NetworkTrainer(object):
 
             self.update_train_loss_MA()  # needed for lr scheduler and stopping of training
 
-            continue_training = self.on_epoch_end()
+            continue_training, dice_score = self.on_epoch_end()
 
             epoch_end_time = time()
 
@@ -515,6 +515,8 @@ class NetworkTrainer(object):
 
             if self.wandb_log:
                 wandb.log({"train_loss": self.all_tr_losses[-1], "val_loss": self.all_val_losses[-1]})
+                for i in range(len(dice_score)):
+                    wandb.log({f"dice_score_{i}": dice_score[i]})
 
         self.epoch -= 1  # if we don't do this we can get a problem with loading model_final_checkpoint.
 
@@ -629,7 +631,7 @@ class NetworkTrainer(object):
         return continue_training
 
     def on_epoch_end(self):
-        self.finish_online_evaluation()  # does not have to do anything, but can be used to update self.all_val_eval_
+        dice_score = self.finish_online_evaluation()  # does not have to do anything, but can be used to update self.all_val_eval_
         # metrics
 
         self.plot_progress()
@@ -641,7 +643,7 @@ class NetworkTrainer(object):
         self.update_eval_criterion_MA()
 
         continue_training = self.manage_patience()
-        return continue_training
+        return continue_training, dice_score
 
     def update_train_loss_MA(self):
         if self.train_loss_MA is None:
