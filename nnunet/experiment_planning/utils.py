@@ -48,9 +48,7 @@ def split_4d(input_folder, num_processes=default_num_threads, overwrite_task_out
     if overwrite_task_output_id is None:
         overwrite_task_output_id = input_task_id
 
-    task_name = full_task_name[7:]
-
-    output_folder = join(nnUNet_raw_data, "Task%03.0d_" % overwrite_task_output_id + task_name)
+    output_folder = join(input_folder, "preprocessed_data", "raw")
 
     if isdir(output_folder):
         shutil.rmtree(output_folder)
@@ -119,20 +117,20 @@ def get_caseIDs_from_splitted_dataset_folder(folder):
     return files
 
 
-def crop(task_string, override=False, num_threads=default_num_threads):
-    cropped_out_dir = join(nnUNet_cropped_data, task_string)
+def crop(input_folder, override=False, num_threads=default_num_threads):
+    cropped_out_dir = join(input_folder, "preprocessed_data", "cropped")
     maybe_mkdir_p(cropped_out_dir)
 
     if override and isdir(cropped_out_dir):
         shutil.rmtree(cropped_out_dir)
         maybe_mkdir_p(cropped_out_dir)
 
-    splitted_4d_output_dir_task = join(nnUNet_raw_data, task_string)
+    splitted_4d_output_dir_task = join(input_folder, "preprocessed_data", "raw")
     lists, _ = create_lists_from_splitted_dataset(splitted_4d_output_dir_task)
 
     imgcrop = ImageCropper(num_threads, cropped_out_dir)
     imgcrop.run_cropping(lists, overwrite_existing=override)
-    shutil.copy(join(nnUNet_raw_data, task_string, "dataset.json"), cropped_out_dir)
+    shutil.copy(join(input_folder, "preprocessed_data", "raw", "dataset.json"), cropped_out_dir)
 
 
 def analyze_dataset(task_string, override=False, collect_intensityproperties=True, num_processes=default_num_threads):

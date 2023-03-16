@@ -98,6 +98,7 @@ def verify_dataset_integrity(folder):
     :param folder:
     :return:
     """
+    folder = join(folder, "preprocessed_data", "raw")
     assert isfile(join(folder, "dataset.json")), "There needs to be a dataset.json file in folder, folder=%s" % folder
     assert isdir(join(folder, "imagesTr")), "There needs to be a imagesTr subfolder in folder, folder=%s" % folder
     assert isdir(join(folder, "labelsTr")), "There needs to be a labelsTr subfolder in folder, folder=%s" % folder

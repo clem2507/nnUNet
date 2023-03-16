@@ -32,32 +32,24 @@ def crawl_and_remove_hidden_from_decathlon(folder):
     assert 'labelsTr' in subf, "This does not seem to be a decathlon folder. Please give me a " \
                                                      "folder that starts with TaskXX and has the subfolders imagesTr, " \
                                                      "labelsTr and imagesTs"
-    _ = [os.remove(i) for i in subfiles(folder, prefix=".")]
-    _ = [os.remove(i) for i in subfiles(join(folder, 'imagesTr'), prefix=".")]
-    _ = [os.remove(i) for i in subfiles(join(folder, 'labelsTr'), prefix=".")]
-    _ = [os.remove(i) for i in subfiles(join(folder, 'imagesTs'), prefix=".")]
 
 
-def main():
-    import argparse
-    parser = argparse.ArgumentParser(description="The MSD provides data as 4D Niftis with the modality being the first"
-                                                 " dimension. We think this may be cumbersome for some users and "
-                                                 "therefore expect 3D niftixs instead, with one file per modality. "
-                                                 "This utility will convert 4D MSD data into the format nnU-Net "
-                                                 "expects")
-    parser.add_argument("-i", help="Input folder. Must point to a TaskXX_TASKNAME folder as downloaded from the MSD "
-                                   "website", required=True)
-    parser.add_argument("-p", required=False, default=default_num_threads, type=int,
-                        help="Use this to specify how many processes are used to run the script. "
-                             "Default is %d" % default_num_threads)
-    parser.add_argument("-output_task_id", required=False, default=None, type=int,
-                        help="If specified, this will overwrite the task id in the output folder. If unspecified, the "
-                             "task id of the input folder will be used.")
-    args = parser.parse_args()
+def main(input_folder, num_threads=default_num_threads, output_task_id=None):
+    '''
+    This is a utility to convert the 4D niftis that the MSD provides into the format nnU-Net expects.
 
-    crawl_and_remove_hidden_from_decathlon(args.i)
+    args:
+        input_folder: str
+            Path to the TaskXX folder that you downloaded from the MSD website
+        num_threads: int
+            How many processes to use for the conversion
+        output_task_id: int
+            If specified, this will overwrite the task id in the output folder
+            If unspecified, the task id of the input folder will be used
+    '''
 
-    split_4d(args.i, args.p, args.output_task_id)
+    crawl_and_remove_hidden_from_decathlon(input_folder)
+    split_4d(input_folder, num_threads, output_task_id)
 
 
 if __name__ == "__main__":
