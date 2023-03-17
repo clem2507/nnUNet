@@ -63,6 +63,14 @@ def split_4d(input_folder, num_processes=default_num_threads, overwrite_task_out
             os.mkdir(curr_out_dir)
         curr_dir = join(input_folder, subdir)
         nii_files = [join(curr_dir, i) for i in os.listdir(curr_dir) if i.endswith(".nii.gz")]
+        nii_files_temp = []
+        for n in nii_files:
+            idx_1 = n.find("_")+1
+            idx_2 = n.find(".nii.gz")
+            num = n[idx_1:idx_2].zfill(3)
+            new_name = n[:idx_1] + num + n[idx_2:]
+            nii_files_temp.append(new_name)
+        nii_files = nii_files_temp
         nii_files.sort()
         for n in nii_files:
             files.append(n)

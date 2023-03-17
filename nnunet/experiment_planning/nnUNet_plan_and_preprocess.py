@@ -89,9 +89,9 @@ def main(input_folder,
                                                                        "'-pl3d ExperimentPlanner3D_v21_Pretrained'"
 
     if verify_dataset:
-        verify_dataset_integrity(join(input_folder))
+        verify_dataset_integrity(input_folder)
 
-    crop(join(input_folder), True, tf)
+    crop(input_folder, True, tf)
 
     search_in = join(nnunet.__path__[0], "experiment_planning")
 
